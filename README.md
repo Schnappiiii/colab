@@ -26,62 +26,73 @@ Applying YOLO Object Detection to detect the area of bar or pie or ring, in oder
 
 ### Traning dataset (TBD)
 FigureQA Dataset: https://www.microsoft.com/en-us/research/project/figureqa-dataset/
+
 This dataset is very simple and the variation is small, so don't need to train lots of images. Just feeding 1000 charts per class into the model and around 10 epochs the model has already converged.
 
 ### Training phase (TBD)
 batch: 16, epoch: 20, 
 
 ## Data extraction 
-### Axis detection 
+### Optical character recognition (OCR)
+In this experiment, Google Coloud Vision OCR API was applied. Because it is more accurate than pytesseract in sustainabilty data report. Before runing Pipeline.ipynb, firstly deploy Google Coloud Vision OCR API and set "vision_api.json" file into OCR.py. If using pytesseract, windows system user should download pytesseract.exe and set it in OCR.py. On the contrary, macOs system user just need to set Google Vision API. (When using pytesseract library, different versions of pandas will generate different errors, this code has been verified on 1.3.5 and 1.5.3 versions)
+
+Extracting useful data, i.e., text, xmin, ymin, xmax, ymax, width, height into dataframe format.
+
+### Axis detection (TBD)
+1. Firstly, the image is converted into black and white image (grayscale). (top left pixel coordinates!)
+2. Scondly, searching for y-axis. Set search range (10, width//4). Sometimes there is a line on the leftmost of chart. Calculating the number of pixels less than 200 in each column. The maximum value is the x-coordinate of the y-axis.
+3. Thirdly, searching for x-axis. If chart type is 'muti-legend', set search range (height-height//2, height-height//10), legends are under x-axis in most case in data report, else set search range (height-height//2, height-20), sometimes there is a line on the bottom of the picture. Calculating the number of pixels less than 200 in each row. The row maximum value is the y-coordinate of the x-axis. 
+4. Fourthly, since some of charts have grid line, this can seriously affect the detection results. OCR result will be used for searching for axis. The range is the same above. Which column has the maximum value of ymin is y-axis and which row has the maximum value of xmax is x-axis. If no value is found, set it 0.
+5. Fifthly, for y-axis, get the minimum of these two values. For x-axis, get the maximum of these two values. 
+
+(result pictures)
+
+## Title detection (TBD)
+1. For title detection, don't need to sort dataframe, because Google Vision OCR is arranged in the order of the title.
+2. If the distance of two words is not more than 20 or the distance of two line is not more than 10,, thus it's a part of title.  
+
+
+## Axis ticks detection (TBD)
+### X-ticks
+1. Sort xmin, ymin by ascending order (Google Coloud Vision OCR API default order). 
+2. Filter the text boxes which are below the x-axis (set a little tolerance 30) and to the right of y-axis. 
+3. As one tick not always contain just one word, so if the distance of two words is not more than 20, considering it as a part of tick.
+
+### Y-ticks
+1. Sort xmin, ymin by ascending order (Google Coloud Vision OCR API default order). 
+2. Filter the text boxes which are below title and above x-axis, as well as to the left of y-axis. (set a little tolerance 30) 
+3. If there is a "%", value divided by 100. If ",", delete it, etc.
+
+### Color isolation
+A number of people suggest converting image to HSV or LAB color space, but they have already known a color. Some recommend using K-mean algorithm, prerequisite is we know the number of class. In our case the result of these two method is bad. 
+
+I tried some image angmentation methods and think Gaussian Blur(radius=2)) is the best one. Making the blur slightly larger can effectively remove the text that has same color as bar or pie and also decrease the other small color noise, in order to increse the accuracy. Of course, not all the color in chart can be extracted, e.g., light color (light blue). The other preprocessing it's ok, like: adjust the color balance (0.9), diminish contrast (0.85), adjust image sharpness (1.5).
+
+### Legend detection
+1. Get contour of each color using blurred image. Then, deleting the bar, the rest of contour points belong to color.
+2. Based on color legend contour, take backward values. Since one legend usually don't contain just one word, so if the distance of two words is not more than 20, considering it as a part of legend.
+
+### Value detection
+- value above the bar
+
+- value don't above the bar
+
+- pie or ring
+After the color isolation, we can count the number of pixel that in this color area. Finally, divided by the total number and get the percentage. 
 
 
 
-In this experiment, Google Coloud Vision OCR API was applied. Because it is more accurate than pytesseract in sustainabilty data report. Before runing Pipeline.ipynb, firstly deploy Google Coloud Vision OCR API. If using pytesseract, windows system user should download pytesseract.exe and set it in OCR.py. On the contrary, macOs system user don't need to do anything. (When using pytesseract library, different versions of pandas will generate different errors, this code has been verified on 1.3.5 and 1.5.3 versions)
 
 
 =======
 
-The first step: try AutoEncoder to classify the pictures with unsupervised learning method.
-
-Run AutoEncoder.ipynb. The rim images can be detected but other categories not, so the result is not well and we should deploy active learning method. 
 
 =======
 
-The second step: label all the images with bounding box manually
-
-Using bbox_folder.py to create folders for different kinds of images with bounding box based on the given dataset. Then, run label.py to label the images. (4 classes: dent, rim, scratch, other)
-
-(Run data_processing.ipynb to bring the information from the original data set together)
-
-=======
-
-The third step: try to use GAN to increse the number of images.
-
-Run GAN_bbox.ipynb and the results don't seem to be looking very good. Therefore, this way does not work.
-
-=======
-
-The fourth step: using different models to train the data and compare them.
-
-1. KNN accuracy: 0.44. Run KNN.ipynb.
-
-2. CNN accuracy: 0.68. Run CNN.ipynb.
-CNN with validation dataset: accuracy 0.66. Run CNN_validataion.ipynb.
-
-3. ResNet50 accuracy: 0.84. Run ResNet50.ipynb.
-ResNet50 with validation dataset: accuracy 0.777. Run ResNet50_validataion.ipynb.
-
-4. DenseNet201 with validation dataset: accuracy 0.81. Run DenseNet201_validataion.ipynb.
-
-5. EfficientNetB7 with validation dataset: accuracy 0.79. Run EfficientNetB7_validataion.ipynb. 
-
-=======
-
-The fifth step: write the report about the algorithm part.
 
 =======
 
 Note:
-* the class folders of Annotated_images are not uploaded, since the size is not small.
+* 
 
 
