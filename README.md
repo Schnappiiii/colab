@@ -1,3 +1,7 @@
+
+In this experiment, Google Coloud Vision OCR API was applied. Because it is more accurate than pytesseract in sustainabilty data report. Before runing Pipeline.ipynb, firstly deploy Google Coloud Vision OCR API. If using pytesseract, windows system user should download pytesseract.exe and set it in OCR.py. On the contrary, macOs system user don't need to do anything.
+
+
 =======
 
 The first step: try AutoEncoder to classify the pictures with unsupervised learning method.
