@@ -74,16 +74,31 @@ I tried some image angmentation methods and think Gaussian Blur(radius=2)) is th
 
 ### Value detection
 - value above the bar
+According to bar ymin, set a interval to see if the value above the bar and within this interval. If each bar has its correspondng value, then don't need to detect y-axis.
 
 - value don't above the bar
+Based on y tick values using proportional relation to calculate the real value.
+(at times y tick begin not from 0)
+
+\begin{equation}
+\begin{aligned}
+y_value = \frac{y_pixel_max - pixel_list}{y_pixel_max - y_pixel_min} * interval + y_tick_min
+\end{aligned}
+\end{equation}
+
+
+
 
 - pie or ring
 After the color isolation, we can count the number of pixel that in this color area. Finally, divided by the total number and get the percentage. 
 
 
+## Problem
+- Chart detection (incomplete chart, such as missing legend or title, etc.) 
 
+- Bar detection (training dataset is simple, if bar is very thin or there is no gap between the two bars, these bars cannot be or inaccurate recognized)
 
-
+- Color extraction and isolation (If there are few components of a certain color, then it is difficult to extract and separate)
 =======
 
 
