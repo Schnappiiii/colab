@@ -80,14 +80,7 @@ According to bar ymin, set a interval to see if the value above the bar and with
 Based on y tick values using proportional relation to calculate the real value.
 (at times y tick begin not from 0)
 
-\begin{equation}
-\begin{aligned}
-y_value = \frac{y_pixel_max - pixel_list}{y_pixel_max - y_pixel_min} * interval + y_tick_min
-\end{aligned}
-\end{equation}
-
-
-
+$$ y_{value} = {\frac{y\textunderscore pixel\textunderscore max - pixel\textunderscore list}{y\textunderscore pixel\textunderscore max - y\textunderscore pixel\textunderscore min} * (y\textunderscore tick\textunderscore max - y\textunderscore tick\textunderscore min) + y\textunderscore tick\textunderscore min} $$
 
 - pie or ring
 After the color isolation, we can count the number of pixel that in this color area. Finally, divided by the total number and get the percentage. 
