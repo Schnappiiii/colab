@@ -1,10 +1,10 @@
 # Data extraction from different types of charts in sustainabilty data reports
-Most of charts in sustainabilty data reports cannot be detected using python PDF libraries. Since they are drawn with code, not simply copied images and pasted them on oages. Even if we can extract all the images in the pdf, but these images contain a variety of types, such as photos of people, landscape photos, signatures, logos, etc., later want to just extract the charts is very difficult.
+Most of charts in sustainabilty data reports cannot be detected using python PDF libraries. Since they are drawn with code or protected, not simply copied images and pasted them on pages. Even if we can extract all the images in the pdf, but these images contain a variety of types, such as photos of people, landscape photos, signatures, logos, etc., later want to just extract the charts is very difficult.
 
 Therefore, in this experiment we try to deploy YOLOv5 End-to-End object detector to detect different types of charts in images. After that for the different categories, data is extracted from the chart into a table.
 
 ## Extracting different types of charts
-### Traning dataset
+### Training dataset
 50 PDFs contain 5981 page images (selected from sustainabilty data report 2022-04-29). Only 715 out of 5981 pages contain charts, 5981/715=8.36 pages/chart. There are 1229 charts in 715 pages. Total images: 28714 (2000 generated images/class + 714 manual labeled page images) 
 
 14 classes: 'single-legend vertical bar chart', 'multi-legend vertical bar chart', 'bi-directional vertical bar chart', 'single-legend horizontal bar chart', 'multi-legend horizontal bar chart', 'bi-directional horizontal bar chart', 'stacked vertical bar chart', 'stacked horizontal bar chart', 'line chart', 'muti-legend line chart', 'single pie chart', 'multi pie chart', 'single ring chart', 'multi ring chart'
@@ -12,32 +12,32 @@ Therefore, in this experiment we try to deploy YOLOv5 End-to-End object detector
 <b> Image generation </b>
 Firstly, using image augmentation, e.g., adding noise, resizing, shifting, rotating, etc. Then, selceting several pages without charts from data report as background (936 text pages in this experiment). Afterwards, randomly sample some points in this page, that is coordinate. Pasting this processed chart onto the page according to this coordinate. Hence one image is obtained with bounding box and don’t need to label them. We can generate as many images as we want by sampling points and using image augmentation. However, the drawback is obvious. Because the variation of pictures is not large, and the model is easy to over-fit.
 
-### Training phase (TBD)
+### Training phase
 batch: 32, epoch: 30, 
 
-### Test dataset (TBD)
+### Test dataset
 99 PDFs contain ? images (selected from sustainabilty data report 2022-04-28)
 
-### Test phase (TBD)
+### Test phase
 conf: 0.8, iou: 0.4. 221 charts were recognized. 
 
-## Detecting the area of bar or pie or ring (TBD)
+## Detecting the area of bar or pie or ring
 Applying YOLO Object Detection to detect the area of bar or pie or ring, in oder to seprate bar and legend, since they are the same color.
 
-### Traning dataset (TBD)
+### Training dataset
 FigureQA Dataset: https://www.microsoft.com/en-us/research/project/figureqa-dataset/
 
 This dataset is very simple and the variation is small, so don't need to train lots of images. Just feeding 1000 charts per class into the model and around 10 epochs the model has already converged.
 
-### Training phase (TBD)
+### Training phase
 batch: 16, epoch: 20, 
 
-## Data extraction 
-### Optical character recognition (OCR)
+## Optical character recognition (OCR)
 In this experiment, Google Coloud Vision OCR API was applied. Because it is more accurate than pytesseract in sustainabilty data report. Before runing Pipeline.ipynb, firstly deploy Google Coloud Vision OCR API and set "vision_api.json" file into OCR.py. If using pytesseract, windows system user should download pytesseract.exe and set it in OCR.py. On the contrary, macOs system user just need to set Google Vision API. (When using pytesseract library, different versions of pandas will generate different errors, this code has been verified on 1.3.5 and 1.5.3 versions)
 
 Extracting useful data, i.e., text, xmin, ymin, xmax, ymax, width, height into dataframe format.
 
+## Data extraction 
 ### Axis detection (TBD)
 1. Firstly, the image is converted into black and white image (grayscale). (top left pixel coordinates!)
 2. Scondly, searching for y-axis. Set search range (10, width//4). Sometimes there is a line on the leftmost of chart. Calculating the number of pixels less than 200 in each column. The maximum value is the x-coordinate of the y-axis.
@@ -92,15 +92,40 @@ After the color isolation, we can count the number of pixel that in this color a
 - Bar detection (training dataset is simple, if bar is very thin or there is no gap between the two bars, these bars cannot be or inaccurate recognized)
 
 - Color extraction and isolation (If there are few components of a certain color, then it is difficult to extract and separate)
-=======
 
 
 =======
+## Getting started
+Notice: some data report name contain special letters, like ä, ü, ö, ß, windows system: pd.read_csv(..., encoding='latin1'), mac system just pd.read_csv(...). The code will detect system type, don't need to do anything. 
 
+### Environment setting
+Please first install [Anaconda](https://anaconda.org) and create an Anaconda environment using the provided package list.
+```
+ conda create  --name data_extraction --file environment.yml
+```
 
-=======
+After you create the environment, activate it.
+```
+conda activate data_extraction
+```
 
-Note:
-* 
+Or you have already a environment and just install pakages.
+```
+pip install -r requirements.txt
+```
 
+Our current implementation only supports GPU so you need a GPU and need to have CUDA installed on your machine.
+
+### Clone YOLO repo
+Clone repo and install requirements.txt in a Python>=3.7.0 environment, including PyTorch>=1.7.
+```
+git clone https://github.com/ultralytics/yolov5  # clone
+cd yolov5
+pip install -r requirements.txt  # install
+```
+
+### OCR
+- If you want to deploy Google Coloud Vision OCR API, put "vision_api.json" file path into OCR.py api_path. See the [cloud google vision doc](https://cloud.google.com/vision/docs/ocr) for how to generate this ".json" file. See the [Cloud Vision pricing](https://cloud.google.com/vision/pricing) for price list. (First 1000 units/month)
+
+- If using pytesseract, windows system users should download pytesseract.exe and set its path in OCR.py api_path. On the contrary, macOs system users don't need to do anything . (When using pytesseract library, different versions of pandas will generate different errors, this code has been verified on 1.3.5 and 1.5.3 versions)
 
