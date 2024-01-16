@@ -1,131 +1,107 @@
-# Data extraction from different types of charts in sustainabilty data reports
-Most of charts in sustainabilty data reports cannot be detected using python PDF libraries. Since they are drawn with code or protected, not simply copied images and pasted them on pages. Even if we can extract all the images in the pdf, but these images contain a variety of types, such as photos of people, landscape photos, signatures, logos, etc., later want to just extract the charts is very difficult.
+# Battery aging trajectory prediction with deep learning
 
-Therefore, in this experiment we try to deploy YOLOv5 End-to-End object detector to detect different types of charts in images. After that for the different categories, data is extracted from the chart into a table.
+Excessive battery aging can lead to disasters such as explosions, so accurate prediction of battery aging is crucial. Moreover, battery aging tests are costly and time-consuming. The aim of this work is to deploy deep learning models on more complicated cases and use as little input data as possible.
 
-## Extracting different types of charts
-### Training dataset
-50 PDFs contain 5981 page images (selected from sustainabilty data report 2022-04-29). Only 715 out of 5981 pages contain charts, 5981/715=8.36 pages/chart. There are 1229 charts in 715 pages. Total images: 28714 (2000 generated images/class + 714 manual labeled page images) 
+## Datasets
+- MIT/Stanford battery dataset (public)
+  
+  Original dataset: [Data-driven prediction of battery cycle life before capacity degradation](https://data.matr.io/1/projects/5c48dd2bc625d700019f3204). Processed by Thomas in this [paper](https://www.sciencedirect.com/science/article/abs/pii/S2352152X23022399).
 
-14 classes: 'single-legend vertical bar chart', 'multi-legend vertical bar chart', 'bi-directional vertical bar chart', 'single-legend horizontal bar chart', 'multi-legend horizontal bar chart', 'bi-directional horizontal bar chart', 'stacked vertical bar chart', 'stacked horizontal bar chart', 'line chart', 'muti-legend line chart', 'single pie chart', 'multi pie chart', 'single ring chart', 'multi ring chart'
+  ├── [datasets/Stanford_battery_dict_len8.pkl](./datasets/Stanford_battery_dict_len8.pkl)
 
-<b> Image generation </b>
-Firstly, using image augmentation, e.g., adding noise, resizing, shifting, rotating, etc. Then, selceting several pages without charts from data report as background (936 text pages in this experiment). Afterwards, randomly sample some points in this page, that is coordinate. Pasting this processed chart onto the page according to this coordinate. Hence one image is obtained with bounding box and don’t need to label them. We can generate as many images as we want by sampling points and using image augmentation. However, the drawback is obvious. Because the variation of pictures is not large, and the model is easy to over-fit.
+  The final processed data:
 
-### Training phase
-batch: 32, epoch: 30, 
+  ├── [datasets/Stanford_battery_f8_cubicSpline_dict.pkl](./datasets/Stanford_battery_f8_cubicSpline_dict.pkl)
 
-### Test dataset
-99 PDFs contain ? images (selected from sustainabilty data report 2022-04-28)
+- FTM (Chair of Automotive Technology) battery dataset (not public)
+  
+  Processed by Thomas in this [paper](https://www.sciencedirect.com/science/article/abs/pii/S2352152X23022399).
 
-### Test phase
-conf: 0.8, iou: 0.4. 221 charts were recognized. 
+  ├── [datasets/TUM_battery_dict.pkl](./datasets/TUM_battery_dict.pkl).
 
-## Detecting the area of bar or pie or ring
-Applying YOLO Object Detection to detect the area of bar or pie or ring, in oder to seprate bar and legend, since they are the same color.
+  The final processed data:
 
-### Training dataset
-FigureQA Dataset: https://www.microsoft.com/en-us/research/project/figureqa-dataset/
+  ├── [datasets/TUM_battery_f6_cubicSpline_dict.pkl](./datasets/TUM_battery_f6_cubicSpline_dict.pkl)
+  
+### Synthetic datasets (MIT/Stanford battery dataset)
+1. Original batteries + scaled batteries with EFC > 1000 (total 164 batteries) for mixed battery data: 
+   
+   ├── [datasets/Stanford_battery_all_1000synthetic_dict1.pkl](./datasets/Stanford_battery_all_1000synthetic_dict1.pkl)
+3. Scaled battery aging curves + exponential function curves for pre-training and fine tuning (total 145 batteries): 
 
-This dataset is very simple and the variation is small, so don't need to train lots of images. Just feeding 1000 charts per class into the model and around 10 epochs the model has already converged.
+   ├── [datasets/Stanford_battery_exp_synthetic_dict.pkl](./datasets/Stanford_battery_exp_synthetic_dict.pkl)
+5. Original batteries with EFC > 1000 + scaled batteries with EFC > 1000 (total 98 batteries) for training models under battery EFC > 1000:
+   ├── [datasets/Stanford_battery_1000synthetic_dict.pkl](./datasets/Stanford_battery_1000synthetic_dict.pkl)
 
-### Training phase
-batch: 16, epoch: 20, 
+### Age days datasets (MIT/Stanford and FTM battery dataset)
+Input is age day unit, not EFC.
+1. ├── [datasets/Stanford_age_days_dict.pkl](./datasets/Stanford_age_days_dict.pkl) (not performed in this experiment)
 
-## Optical character recognition (OCR)
-In this experiment, Google Coloud Vision OCR API was applied. Because it is more accurate than pytesseract in sustainabilty data report. Before runing Pipeline.ipynb, firstly deploy Google Coloud Vision OCR API and set "vision_api.json" file into OCR.py. If using pytesseract, windows system user should download pytesseract.exe and set it in OCR.py. On the contrary, macOs system user just need to set Google Vision API. (When using pytesseract library, different versions of pandas will generate different errors, this code has been verified on 1.3.5 and 1.5.3 versions)
+2. ├── [datasets/TUM_age_days_dict.pkl](./datasets/TUM_age_days_dict.pkl) (granularity 1: [0,1,2,3,4,5,6,7,8,9,...])
 
-Extracting useful data, i.e., text, xmin, ymin, xmax, ymax, width, height into dataframe format.
+3. ├── [datasets/TUM_age_days_more_dict.pkl](./datasets/TUM_age_days_more_dict.pkl) (granularity 0.1: [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,...], using sampling_frequency: 10 in hyperparameters.yaml = granularity 1, so [datasets/TUM_age_days_dict.pkl](./datasets/TUM_age_days_dict.pkl) can be ignored.)
 
-## Data extraction 
-### Axis detection (TBD)
-1. Firstly, the image is converted into black and white image (grayscale). (top left pixel coordinates!)
-2. Scondly, searching for y-axis. Set search range (10, width//4). Sometimes there is a line on the leftmost of chart. Calculating the number of pixels less than 200 in each column. The maximum value is the x-coordinate of the y-axis.
-3. Thirdly, searching for x-axis. If chart type is 'muti-legend', set search range (height-height//2, height-height//10), legends are under x-axis in most case in data report, else set search range (height-height//2, height-20), sometimes there is a line on the bottom of the picture. Calculating the number of pixels less than 200 in each row. The row maximum value is the y-coordinate of the x-axis. 
-4. Fourthly, since some of charts have grid line, this can seriously affect the detection results. OCR result will be used for searching for axis. The range is the same above. Which column has the maximum value of ymin is y-axis and which row has the maximum value of xmax is x-axis. If no value is found, set it 0.
-5. Fifthly, for y-axis, get the minimum of these two values. For x-axis, get the maximum of these two values. 
+### Other datasets (MIT/Stanford and FTM battery dataset)
+Other methods for data processing were also conducted. However, they were not shown in this work since the prediction results were not well. 
+├── [other_datasets](./other_datasets) 
 
-(result pictures)
+<b> Please don't forget to copy datasets from ‘datasets’ folder to the individual model 'dataset' folder <b>, for example, [datasets/Stanford_battery_dict_len8.pkl](./datasets/Stanford_battery_dict_len8.pkl) --> [ae_cnn_rnn_attention/datasets/Stanford_battery_dict_len8.pkl](./ae_cnn_rnn_attention/datasets/Stanford_battery_dict_len8.pkl)
 
-## Title detection (TBD)
-1. For title detection, don't need to sort dataframe, because Google Vision OCR is arranged in the order of the title.
-2. If the distance of two words is not more than 20 or the distance of two line is not more than 10,, thus it's a part of title.  
+## Models
+Because this work only focused on DeAE-CNN-GRU-Attention and Informer-CNN-LSTM these two new models, the comments in the code script of CNN-GRU-Attention and LSTM-Autoencoder are not comprehensive (codes are similar to DeAE-CNN-GRU-Attention model).
+1. [ae_cnn_rnn_attention](./ae_cnn_rnn_attention) denotes DeAE-CNN-GRU-Attention model. But you can change different models combined with Denoising Autoencoder in [ae_cnn_rnn_attention/hyperparameters.yaml](./ae_cnn_rnn_attention/hyperparameters.yaml), namely, ae_cnn_rnn_attention, ae_rnn, ae_cnn_rnn, ae_cnn_rnn_attention, ae_transformer_encoder.
+2. [informer](./informer) denotes [Informer model](https://arxiv.org/abs/2012.07436). Available model combinations in [informer/hyperparameters.yaml](./informer/hyperparameters.yaml) are informer, informerstack and informer_cnn_rnn.
+3. [cnn_rnn_attention](./cnn_rnn_attention) denotes CNN-GRU-Attention model. Available model combinations in [cnn_rnn_attention/hyperparameters.yaml](./cnn_rnn_attention/hyperparameters.yaml) are rnn, cnn_rnn, fpn_attention (Feature Pyramid Network + Attention), cnn_rnn_attention, fpn_rnn_attention and transformer_encoder.
+4. [rnn_autoencoder](./rnn_autoencoder) denotes RNN-Autoencoder model. Available model combinations in [rnn_autoencoder/hyperparameters.yaml](./rnn_autoencoder/hyperparameters.yaml) are rnn_autoencoder, rnn_autoencoder1 (step by step prediction in Decoder part), rnn_autoencoder_cnn_attention and rnn_autoencoder_transencoder (RNN-Autoencoder + Transformer Encoder).
 
+All RNNs can be replaced by LSTM, GRU or vanilla RNNs.
 
-## Axis ticks detection (TBD)
-### X-ticks
-1. Sort xmin, ymin by ascending order (Google Coloud Vision OCR API default order). 
-2. Filter the text boxes which are below the x-axis (set a little tolerance 30) and to the right of y-axis. 
-3. As one tick not always contain just one word, so if the distance of two words is not more than 20, considering it as a part of tick.
-
-### Y-ticks
-1. Sort xmin, ymin by ascending order (Google Coloud Vision OCR API default order). 
-2. Filter the text boxes which are below title and above x-axis, as well as to the left of y-axis. (set a little tolerance 30) 
-3. If there is a "%", value divided by 100. If ",", delete it, etc.
-
-### Color isolation
-A number of people suggest converting image to HSV or LAB color space, but they have already known a color. Some recommend using K-mean algorithm, prerequisite is we know the number of class. In our case the result of these two method is bad. 
-
-I tried some image angmentation methods and think Gaussian Blur(radius=2)) is the best one. Making the blur slightly larger can effectively remove the text that has same color as bar or pie and also decrease the other small color noise, in order to increse the accuracy. Of course, not all the color in chart can be extracted, e.g., light color (light blue). The other preprocessing it's ok, like: adjust the color balance (0.9), diminish contrast (0.85), adjust image sharpness (1.5).
-
-### Legend detection
-1. Get contour of each color using blurred image. Then, deleting the bar, the rest of contour points belong to color.
-2. Based on color legend contour, take backward values. Since one legend usually don't contain just one word, so if the distance of two words is not more than 20, considering it as a part of legend.
-
-### Value detection
-- value above the bar
-According to bar ymin, set a interval to see if the value above the bar and within this interval. If each bar has its correspondng value, then don't need to detect y-axis.
-
-- value don't above the bar
-Based on y tick values using proportional relation to calculate the real value.
-(at times y tick begin not from 0)
-
-$$ y_{value} = {\frac{y\textunderscore pixel\textunderscore max - pixel\textunderscore list}{y\textunderscore pixel\textunderscore max - y\textunderscore pixel\textunderscore min} * (y\textunderscore tick\textunderscore max - y\textunderscore tick\textunderscore min) + y\textunderscore tick\textunderscore min} $$
-
-- pie or ring
-After the color isolation, we can count the number of pixel that in this color area. Finally, divided by the total number and get the percentage. 
+## Result
+Build model directory to save model, result images and so on.
+```
+├── model_result
+    ├── model_name
+        ├── experiment1
+            ├── image
+                ├── train_prediction
+                ├── validation_prediction
+                ├── test_prediction
+                ├── full_original_prediction
+                ├── new_data_prediction (if necessary)
+                - training_validation_loss.png
+            - hyperparameters.yaml
+            - experiment_parameters.yaml
+            - MinMaxScaler.pkl
+            - checkpoint.pth
+            - training_prediction_summary_dict.pkl
+            - validation_prediction_summary_dict.pkl
+            - test_prediction_summary_dict.pkl
+            - full_original_prediction_summary_dict.pkl
+            - summery_dict.pkl
+        - experiment2
+        - ...
+    ├── sensitivity_analysis_result (if necessary)
+```
 
 
-## Problem
-- Chart detection (incomplete chart, such as missing legend or title, etc.) 
-
-- Bar detection (training dataset is simple, if bar is very thin or there is no gap between the two bars, these bars cannot be or inaccurate recognized)
-
-- Color extraction and isolation (If there are few components of a certain color, then it is difficult to extract and separate)
-
-
-=======
+============================
 ## Getting started
-Notice: some data report name contain special letters, like ä, ü, ö, ß, windows system: pd.read_csv(..., encoding='latin1'), mac system just pd.read_csv(...). The code will detect system type, don't need to do anything. 
+Notice: if you use Google Colab then don't need to create and set an Anaconda environment.
 
-### Environment setting
-Please first install [Anaconda](https://anaconda.org) and create an Anaconda environment using the provided package list.
+1. If you save this folder in the Google Dive, you need first connected Colab to Dive. (not recommend, because sometimes Colab will automatically disconnected to Drive. 😂)
 ```
- conda create  --name data_extraction --file environment.yml
+ from google.colab import drive
+ drive.mount('/content/drive')
 ```
-
-After you create the environment, activate it.
+The other simple way is to zip the file (.zip) before uploading it to Colab (). Open [run.ipynb](./run.ipynb), in the colab interface go to the left side and click on file, then drag and drop the compressed file into the window. After that,
 ```
-conda activate data_extraction
-```
-
-Or you have already a environment and just install pakages.
-```
-pip install -r requirements.txt
+ !unzip 
+ !python
+ !zip -r result.zip
+ Downloading...
 ```
 
-Our current implementation only supports GPU so you need a GPU and need to have CUDA installed on your machine.
+Recommend use GPU since training model is time comsuming. 
 
-### Clone YOLO repo
-Clone repo and install requirements.txt in a Python>=3.7.0 environment, including PyTorch>=1.7.
-```
-git clone https://github.com/ultralytics/yolov5  # clone
-cd yolov5
-pip install -r requirements.txt  # install
-```
 
-### OCR
-- If you want to deploy Google Coloud Vision OCR API, put "vision_api.json" file path into OCR.py api_path. See the [cloud google vision doc](https://cloud.google.com/vision/docs/ocr) for how to generate this ".json" file. See the [Cloud Vision pricing](https://cloud.google.com/vision/pricing) for price list. (First 1000 units/month)
-
-- If using pytesseract, windows system users should download pytesseract.exe and set its path in OCR.py api_path. On the contrary, macOs system users don't need to do anything . (When using pytesseract library, different versions of pandas will generate different errors, this code has been verified on 1.3.5 and 1.5.3 versions)
 
