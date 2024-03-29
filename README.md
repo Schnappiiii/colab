@@ -27,12 +27,22 @@ Excessive battery aging can lead to disasters such as explosions, so accurate pr
 1. Original batteries + scaled batteries with EFC > 1000 (total 164 batteries) for mixed battery data: 
    
    ├── [datasets/Stanford_battery_all_1000synthetic_dict1.pkl](./datasets/Stanford_battery_all_1000synthetic_dict1.pkl)
-3. Scaled battery aging curves + exponential function curves for pre-training and fine tuning (total 145 batteries): 
-
+2. Scaled battery aging curves + exponential function curves for pre-training and fine tuning (total 145 batteries):
+   
    ├── [datasets/Stanford_battery_exp_synthetic_dict.pkl](./datasets/Stanford_battery_exp_synthetic_dict.pkl)
-5. Original batteries with EFC > 1000 + scaled batteries with EFC > 1000 (total 98 batteries) for training models under battery EFC > 1000:
+3. Original batteries with EFC > 1000 + scaled batteries with EFC > 1000 (total 98 batteries) for training models under battery EFC > 1000:
+   
    ├── [datasets/Stanford_battery_1000synthetic_dict.pkl](./datasets/Stanford_battery_1000synthetic_dict.pkl)
 
+### Synthetic datasets (FTM battery dataset)
+1. Original batteries + scaled batteries (29+29 = total 58 batteries) for mixed battery data:
+   
+   ├── [datasets/TUM_battery_mix_dict.pkl](./datasets/TUM_battery_mix_dict.pkl)
+   
+4. Mixed batteries with EFC < 1500 and scaled batteries with EFC >= 1500:
+   ├── [datasets/TUM_battery_mix_eol_dict1.pkl](./datasets/TUM_battery_mix_eol_dict1.pkl)
+   ├── [datasets/TUM_battery_mix_eol_dict2.pkl](./datasets/TUM_battery_mix_eol_dict2.pkl)
+   
 ### Age days datasets (MIT/Stanford and FTM battery dataset)
 Input is age day unit, not EFC.
 1. ├── [datasets/Stanford_age_days_dict.pkl](./datasets/Stanford_age_days_dict.pkl) (not performed in this experiment)
