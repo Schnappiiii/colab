@@ -39,8 +39,10 @@ Excessive battery aging can lead to disasters such as explosions, so accurate pr
    
    ├── [datasets/TUM_battery_mix_dict.pkl](./datasets/TUM_battery_mix_dict.pkl)
    
-4. Mixed batteries with EFC < 1500 and scaled batteries with EFC >= 1500:
+2. Mixed batteries with EFC < 1500 and scaled batteries with EFC >= 1500:
+   
    ├── [datasets/TUM_battery_mix_eol_dict1.pkl](./datasets/TUM_battery_mix_eol_dict1.pkl)
+   
    ├── [datasets/TUM_battery_mix_eol_dict2.pkl](./datasets/TUM_battery_mix_eol_dict2.pkl)
    
 ### Age days datasets (MIT/Stanford and FTM battery dataset)
