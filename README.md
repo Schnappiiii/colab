@@ -105,9 +105,7 @@ Build model directory to save model, result images and so on.
 ```
 
 - experiment_parameters.yaml: save experiment path and battery names in different data sets, etc.
-
 - summery_dict.pkl: save training information, e.g., early_stopping_epoch, num_epochs, epoch_time, total_time, train_loss_list, etc.
-  
 - training_prediction_summary_dict.pkl or validation_prediction_summary_dict.pkl or test_prediction_summary_dict.pkl or full_original_prediction_summary_dict.pkl (prediction of all batteries) include the actual&prediction&normalized data&corresponding EFC of each battery and metric_loss_mean (different evaluation metric over entire battery lifetime) and metric_loss_mean_clip_0.8/metric_loss_mean_clip (different evaluation metric before 80% SOH).
 
 ============================
