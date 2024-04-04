@@ -75,7 +75,7 @@ All RNNs can be replaced by LSTM, GRU or vanilla RNNs.
 - Scaler (preprocessing) can be selected between MinMaxScaler and StandardScaler (MinMaxScaler is better for battery aging predcition). 
 - max_efcs refers to only training batteries whose battery life cycle is less than max_efcs EFC (two stage prediction). 
 - sampling_frequency, seq_len, pred_len: If we want to input 280 EFC and output 200 EFC under sampling_frequency 2, seq_len is then 280/2=140, pred_len is 200/2=100.
-- freeze_layers: freeze some layers for fine-tuning. if Ture, layers in _build_model function should be changed in [exp](./exp/exp.py).
+- freeze_layers: freeze some layers for fine-tuning. if Ture, layers in _build_model function should be changed in [exp.py](./exp/exp.py).
   
 ## Result
 Build model directory to save model, result images and so on.
