@@ -30,7 +30,7 @@ Excessive battery aging can lead to disasters such as explosions, so accurate pr
 2. Scaled battery aging curves + exponential function curves for pre-training and fine tuning (total 145 batteries):
    
    ├── [datasets/Stanford_battery_exp_synthetic_dict.pkl](./datasets/Stanford_battery_exp_synthetic_dict.pkl)
-3. Original batteries with EFC > 1000 + scaled batteries with EFC > 1000 (total 98 batteries) for training models under battery EFC > 1000:
+3. Original batteries with EFC > 1000 + scaled batteries with EFC > 1000 (total 98 batteries) for training models under battery EFC > 1000 (two-stage prediction):
    
    ├── [datasets/Stanford_battery_1000synthetic_dict.pkl](./datasets/Stanford_battery_1000synthetic_dict.pkl)
 
