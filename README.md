@@ -1,6 +1,6 @@
 # Battery aging trajectory prediction with deep learning
 
-Excessive battery aging can lead to disasters such as explosions, so accurate prediction of battery aging is crucial. Moreover, battery aging tests are costly and time-consuming. The aim of this work is to deploy deep learning models on more complicated cases and use as little input data as possible.
+Excessive battery aging can lead to disasters such as explosions, so accurate prediction of battery aging is crucial. Moreover, battery aging tests are costly and time-consuming. The goal of this work is to investigate and compare the different Deep Learning models for battery aging prediction on two data sets. An improved DL model is proposed based on the current state of the art models. 
 
 ## Datasets
 - MIT/Stanford battery dataset (public)
