@@ -75,7 +75,8 @@ All RNNs can be replaced by LSTM, GRU or vanilla RNNs.
 - Scaler (preprocessing) can be selected between MinMaxScaler and StandardScaler (MinMaxScaler is better for battery aging predcition). 
 - max_efcs refers to only training batteries whose battery life cycle is less than max_efcs EFC (two stage prediction). 
 - sampling_frequency, seq_len, pred_len: If we want to input 280 EFC and output 200 EFC under sampling_frequency 2, seq_len is then 280/2=140, pred_len is 200/2=100.
-
+- freeze_layers: freeze some layers for fine-tuning. if Ture, layers in _build_model function should be changed in [exp](./exp/exp.py).
+  
 ## Result
 Build model directory to save model, result images and so on.
 ```
@@ -103,6 +104,11 @@ Build model directory to save model, result images and so on.
     ├── sensitivity_analysis_result (if necessary)
 ```
 
+- experiment_parameters.yaml: save experiment path and battery names in different data sets, etc.
+
+- summery_dict.pkl: save training information, e.g., early_stopping_epoch, num_epochs, epoch_time, total_time, train_loss_list, etc.
+  
+- training_prediction_summary_dict.pkl or validation_prediction_summary_dict.pkl or test_prediction_summary_dict.pkl or full_original_prediction_summary_dict.pkl (prediction of all batteries) include the actual&prediction&normalized data&corresponding EFC of each battery and metric_loss_mean (different evaluation metric over entire battery lifetime) and metric_loss_mean_clip_0.8/metric_loss_mean_clip (different evaluation metric before 80% SOH).
 
 ============================
 ## Getting started
