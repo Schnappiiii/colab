@@ -66,7 +66,7 @@ Because this work only focused on DeAE-CNN-GRU-Attention and Informer-CNN-LSTM t
 3. [cnn_rnn_attention](./cnn_rnn_attention) denotes CNN-GRU-Attention model. Available model combinations in [cnn_rnn_attention/hyperparameters.yaml](./cnn_rnn_attention/hyperparameters.yaml) are rnn, cnn_rnn, fpn_attention (Feature Pyramid Network + Attention), cnn_rnn_attention, fpn_rnn_attention and transformer_encoder. Model transformer_encoder implements this [paper](https://www.mdpi.com/1996-1073/16/17/6328) and using residual neural network to construct Denoising Network. Model cnn_rnn_attention implements this [paper](https://journals.sagepub.com/doi/full/10.1177/17483026221130598).
 4. [rnn_autoencoder](./rnn_autoencoder) denotes RNN-Autoencoder model. Available model combinations in [rnn_autoencoder/hyperparameters.yaml](./rnn_autoencoder/hyperparameters.yaml) are rnn_autoencoder, rnn_autoencoder1 (step by step prediction in Decoder part), rnn_autoencoder_cnn_attention and rnn_autoencoder_transencoder (RNN-Autoencoder + Transformer Encoder). Model rnn_autoencoder implements this [paper](https://www.sciencedirect.com/science/article/pii/S0378775321005528). Model rnn_autoencoder1 implements this [paper](https://www.frontiersin.org/articles/10.3389/fenrg.2022.1093667/full).
 
-5. [Binary classification](./classification.ipynb) denotes binary classification for two stage prediction. KNN, Random forest, XGBoost and LSTM classification models.
+5. [classification](./classification.ipynb) denotes binary classification for two stage prediction. KNN, Random forest, XGBoost and LSTM classification models.
 
 All RNNs can be replaced by LSTM, GRU or vanilla RNNs.
 
